@@ -1,0 +1,7 @@
+[project]
+name = "construction-changes-detector"
+version = "0.1.0"
+description = "Construction Changes Detection from NRSC CARTOSAT satellite imagery (panchromatic 0.65 m resolution)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
