@@ -228,7 +228,7 @@ else:
     feedback = QgsProcessingFeedback()
 
     # Define the output path for the reprojected raster
-    projected_raster_path = '/Users/deepfuck/Downloads/p1ntif.tif'
+    projected_raster_path = 'data/p1ntif.tif'
 
     # Reproject the raster layer
     parameters = {
@@ -274,7 +274,7 @@ else:
     feedback = QgsProcessingFeedback()
 
     # Define the output path for the reprojected raster
-    projected_raster_path = '/Users/deepfuck/Downloads/p1ntif.tif'
+    projected_raster_path = 'p1ntif.tif'
 
     # Reproject the raster layer
     parameters = {
@@ -320,7 +320,7 @@ else:
     feedback = QgsProcessingFeedback()
 
     # Define the output path for the reprojected raster
-    projected_raster_path = '/Users/deepfuck/Downloads/p1ntif.tif'
+    projected_raster_path = 'data/p1ntif.tif'
 
     # Reproject the raster layer
     parameters = {
@@ -349,8 +349,8 @@ else:
     else:
         print('Reprojection failed.')
 
-print("--------->",restif.isValid())
-print(QgsApplication.prefixPath())
+#print("--------->",restif.isValid())
+#print(QgsApplication.prefixPath())
 
 #qgsProject = QgsProject.instance()
 channel_path = "mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"

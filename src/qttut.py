@@ -33,10 +33,10 @@ class MyWnd(QMainWindow):
         self.canvas.setCanvasColor(Qt.white)
         self.canvas.setExtent(layer1.extent())
         self.canvas.setLayers([layer1, layer2, layer3, layer4])
-        print("Layer1 valid:", layer1.isValid())
-        print("Layer2 valid:", layer2.isValid())
-        print("Layer3 valid:", layer3.isValid())
-        print("Layer4 valid:", layer4.isValid())
+        #print("Layer1 valid:", layer1.isValid())
+        #print("Layer2 valid:", layer2.isValid())
+        #print("Layer3 valid:", layer3.isValid())
+        #print("Layer4 valid:", layer4.isValid())
 
         self.setCentralWidget(self.canvas)
 
@@ -100,9 +100,9 @@ class MyWnd(QMainWindow):
         self.addAction(self.actionPan)
         #self.actionZoomOut = self.addAction("Zoom out", self.zoomOut)
         #self.actionPan = self.addAction("Pan", self.pan)
-        print("ZoomIn:", self.actionZoomIn)
-        print("ZoomOut:", self.actionZoomOut)
-        print("Pan:", self.actionPan)
+        #print("ZoomIn:", self.actionZoomIn)
+        #print("ZoomOut:", self.actionZoomOut)
+        #print("Pan:", self.actionPan)
 
 
         for action in (self.actionZoomIn, self.actionZoomOut, self.actionPan):
@@ -186,7 +186,7 @@ def main():
     qgis_prefix = os.path.join(conda_prefix)   # base of conda env
     QgsApplication.setPrefixPath(qgis_prefix, True)
     qgs = QgsApplication([], True)
-    print("QGIS prefix:", QgsApplication.prefixPath())
+    #print("QGIS prefix:", QgsApplication.prefixPath())
     QgsApplication.initQgis()
     Processing.initialize()
 
