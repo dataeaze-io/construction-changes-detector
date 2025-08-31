@@ -228,7 +228,7 @@ else:
     feedback = QgsProcessingFeedback()
 
     # Define the output path for the reprojected raster
-    projected_raster_path = 'data/newprojected_p1ntif.tif'
+    projected_raster_path = '/Users/deepfuck/Downloads/p1ntif.tif'
 
     # Reproject the raster layer
     parameters = {
@@ -274,7 +274,7 @@ else:
     feedback = QgsProcessingFeedback()
 
     # Define the output path for the reprojected raster
-    projected_raster_path = 'data/newprojected_p2ntif.tif'
+    projected_raster_path = '/Users/deepfuck/Downloads/p1ntif.tif'
 
     # Reproject the raster layer
     parameters = {
@@ -320,7 +320,7 @@ else:
     feedback = QgsProcessingFeedback()
 
     # Define the output path for the reprojected raster
-    projected_raster_path = 'data/newprojected_result.tif'
+    projected_raster_path = '/Users/deepfuck/Downloads/p1ntif.tif'
 
     # Reproject the raster layer
     parameters = {

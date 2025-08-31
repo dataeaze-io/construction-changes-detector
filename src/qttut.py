@@ -6,6 +6,7 @@ QGIS + PyQt Application for Binary Change Detection Visualization
 import sys
 import argparse
 import requests
+import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QVBoxLayout, QCheckBox, QSlider, QWidget, QPushButton, QLabel, QFileDialog
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
@@ -15,6 +16,7 @@ from qgis.core import (
 )
 from qgis.gui import QgsMapCanvas, QgsMapToolPan, QgsMapToolZoom
 from processing.core.Processing import Processing, processing
+from PyQt5.QtWidgets import QAction
 
 
 class MyWnd(QMainWindow):
@@ -31,6 +33,11 @@ class MyWnd(QMainWindow):
         self.canvas.setCanvasColor(Qt.white)
         self.canvas.setExtent(layer1.extent())
         self.canvas.setLayers([layer1, layer2, layer3, layer4])
+        print("Layer1 valid:", layer1.isValid())
+        print("Layer2 valid:", layer2.isValid())
+        print("Layer3 valid:", layer3.isValid())
+        print("Layer4 valid:", layer4.isValid())
+
         self.setCentralWidget(self.canvas)
 
         # Layer references
@@ -44,37 +51,59 @@ class MyWnd(QMainWindow):
 
         self.slider1, self.slider2, self.slider3 = QSlider(), QSlider(), QSlider()
         for s in (self.slider1, self.slider2, self.slider3):
-            s.setOrientation(Qt.Vertical)
+            s.setOrientation(Qt.Horizontal)
             s.setRange(0, 100)
 
-        self.apply_button1 = QPushButton("Apply")
-        self.apply_button2 = QPushButton("Apply")
-        self.apply_button3 = QPushButton("Apply")
+        #self.apply_button1 = QPushButton("Apply")
+        #self.apply_button2 = QPushButton("Apply")
+        #self.apply_button3 = QPushButton("Apply")
 
-        self.apply_button1.clicked.connect(lambda: self.apply_transparency(self.layer1, self.slider1))
-        self.apply_button2.clicked.connect(lambda: self.apply_transparency(self.layer2, self.slider2))
-        self.apply_button3.clicked.connect(lambda: self.apply_transparency(self.layer3, self.slider3))
+        #self.apply_button1.clicked.connect(lambda: self.apply_transparency(self.layer1, self.slider1))
+        #self.apply_button2.clicked.connect(lambda: self.apply_transparency(self.layer2, self.slider2))
+        #self.apply_button3.clicked.connect(lambda: self.apply_transparency(self.layer3, self.slider3))
+        self.slider1.valueChanged.connect(lambda v: self.apply_transparency(self.layer1, v))
+        self.slider2.valueChanged.connect(lambda v: self.apply_transparency(self.layer2, v))
+        self.slider3.valueChanged.connect(lambda v: self.apply_transparency(self.layer3, v))
 
         layout = QVBoxLayout()
-        for lbl, sld, btn, name in [
+        layout = QVBoxLayout()
+        for lbl, sld in [
+        (QLabel("Changes"), self.slider3),
+        (QLabel("P2"), self.slider2),
+            (QLabel("P1"), self.slider1),]:
+            layout.addWidget(lbl)
+            layout.addWidget(sld)
+
+        '''for lbl, sld, btn, name in [
             (QLabel("Changes"), self.slider3, self.apply_button3, "Changes"),
             (QLabel("P2"), self.slider2, self.apply_button2, "P2"),
             (QLabel("P1"), self.slider1, self.apply_button1, "P1"),
         ]:
             layout.addWidget(lbl)
             layout.addWidget(sld)
-            layout.addWidget(btn)
+            layout.addWidget(btn)'''
 
         widget = QWidget()
         widget.setLayout(layout)
         self.layers_widget.setWidget(widget)
-
         self.addDockWidget(Qt.LeftDockWidgetArea, self.layers_widget)
-
+        self.actionZoomIn = QAction("Zoom in", self)
+        self.actionZoomOut = QAction("Zoom out", self)
+        self.actionPan = QAction("Pan", self)
+        # Connect the signal
+        self.actionZoomIn.triggered.connect(self.zoomIn)
+        self.actionZoomOut.triggered.connect(self.zoomOut)
+        self.actionPan.triggered.connect(self.pan)
         # Toolbar actions
-        self.actionZoomIn = self.addAction("Zoom in", self.zoomIn)
-        self.actionZoomOut = self.addAction("Zoom out", self.zoomOut)
-        self.actionPan = self.addAction("Pan", self.pan)
+        self.addAction(self.actionZoomIn)
+        self.addAction(self.actionZoomOut)
+        self.addAction(self.actionPan)
+        #self.actionZoomOut = self.addAction("Zoom out", self.zoomOut)
+        #self.actionPan = self.addAction("Pan", self.pan)
+        print("ZoomIn:", self.actionZoomIn)
+        print("ZoomOut:", self.actionZoomOut)
+        print("Pan:", self.actionPan)
+
 
         for action in (self.actionZoomIn, self.actionZoomOut, self.actionPan):
             action.setCheckable(True)
@@ -103,10 +132,17 @@ class MyWnd(QMainWindow):
     def pan(self):
         self.canvas.setMapTool(self.toolPan)
 
-    def apply_transparency(self, layer, slider):
+    '''def apply_transparency(self, layer, slider):
         value = slider.value() / 100.0
         layer.setOpacity(value)
+        layer.triggerRepaint()'''
+    def apply_transparency(self, layer, value):
+        if not layer:
+            return
+        opacity = value / 100.0
+        layer.renderer().setOpacity(opacity)
         layer.triggerRepaint()
+        print(f"{layer.name()} opacity set to {opacity}")
 
 
 def reproject_raster(layer_path, out_path, crs="EPSG:3857"):
@@ -143,16 +179,21 @@ def main():
     parser.add_argument("--p2", required=True, help="Path to latest image (TIF)")
     parser.add_argument("--res", required=True, help="Path to result/changes raster (TIF)")
     args = parser.parse_args()
+    conda_prefix = os.environ.get("CONDA_PREFIX")
+    if not conda_prefix:
+        raise RuntimeError("CONDA_PREFIX not set. Run inside conda env.")
 
-    QgsApplication.setPrefixPath("/usr", True)
+    qgis_prefix = os.path.join(conda_prefix)   # base of conda env
+    QgsApplication.setPrefixPath(qgis_prefix, True)
     qgs = QgsApplication([], True)
+    print("QGIS prefix:", QgsApplication.prefixPath())
     QgsApplication.initQgis()
     Processing.initialize()
 
     # Reproject layers
-    p1_layer = reproject_raster(args.p1, "data/proj_p1.tif")
-    p2_layer = reproject_raster(args.p2, "data/proj_p2.tif")
-    res_layer = reproject_raster(args.res, "data/proj_res.tif")
+    p1_layer = reproject_raster(args.p1, "proj_p1.tif")
+    p2_layer = reproject_raster(args.p2, "proj_p2.tif")
+    res_layer = reproject_raster(args.res, "proj_res.tif")
     base_layer = load_basemap()
 
     # Launch window
